@@ -1,7 +1,7 @@
 
 class Translation(object):
 
-    def __init__(self, foreign_word, native_word, score=0):
+    def __init__(self, native_word, foreign_word, score=0):
         self.foreign_word = foreign_word
         self.native_word = native_word
         self.score = score

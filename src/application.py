@@ -1,5 +1,4 @@
 from database import DatabaseHandler
-from vocabulary import Vocabulary
 from language import Translation
 from command_line import CommandLineInterface
 import random
@@ -16,16 +15,17 @@ class Application(object):
         quit = False
         while not quit:
             activity = self.cli.main_menu()
+            translations = self.load_translations()
 
             if activity == "Translate":
                 self.log_translations()
 
             elif activity == "Practice":
-                self.practice()
+                self.practice(translations)
 
             quit = activity == "quit"
 
-        #  save here
+        self.save_translations(translations)
         print("Saved your progress. Good work, have a great day!")
 
     def log_translations(self):
@@ -36,20 +36,21 @@ class Application(object):
             foreign_word = translation[1]
             if not (native_word and foreign_word):
                 break
+            self.db_handler.add_native_word(native_word)
+            self.db_handler.add_foreign_word(foreign_word)
             self.db_handler.add_translation(native_word, foreign_word)
             print("\n Added translation!\n\n")
             print("-------------------------")
 
-    def practice(self):
-        translations = self.load_translations()
+    def practice(self, translations):
         print("\nTo exit, leave answer empty.\n")
         while True:
             translation = self.get_random_translation(translations)
-            answer = self.cli.translate(translation.get_foreign_word())
+            answer = self.cli.translate(translation.get_native_word())
             if not answer:
                 if self.cli.verify_quit() == "yes" or "1" or "quit" or "exit":
                     break
-            if answer.lower() == translation.get_native_word().lower():
+            if answer.lower() == translation.get_foreign_word().lower():
                 score_change = 1
                 print("\nCorrect!\n")
             else:
@@ -57,6 +58,7 @@ class Application(object):
                     translation.get_foreign_word()))
                 score_change = -2
             self.update_difficulty(translations, translation, score_change)
+        self.save_translations(translations)
 
     def load_translations(self):
         translations = {"hard": [], "medium": [], "easy": []}
@@ -65,6 +67,15 @@ class Application(object):
             translations[self.get_difficulty(score)].append(
                 Translation(db_translation[0], db_translation[1], score))
         return translations
+
+    def save_translations(self, translations):
+        for category in translations:
+            for translation in translations[category]:
+                self.db_handler.update_translation_score(
+                    translation.get_native_word(),
+                    translation.get_foreign_word(),
+                    translation.get_score())
+        self.db_handler.commit_changes()
 
     def get_random_translation(self, translations):
         while True:
