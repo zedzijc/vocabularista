@@ -39,8 +39,7 @@ class Application(object):
             self.db_handler.add_native_word(native_word)
             self.db_handler.add_foreign_word(foreign_word)
             self.db_handler.add_translation(native_word, foreign_word)
-            print("\n Added translation!\n\n")
-            print("-------------------------")
+            print("\n Added translation!")
 
     def practice(self, translations):
         print("\nTo exit, leave answer empty.\n")

@@ -1,4 +1,3 @@
-
 class Translation(object):
 
     def __init__(self, native_word, foreign_word, score=0):
@@ -16,7 +15,4 @@ class Translation(object):
         return self.score
 
     def update_score(self, score_delta):
-        if self.score + score_delta < 0:
-            self.score = 0
-        else:
-            self.score += score_delta
+        self.score = 0 if (self.score + score_delta) < 0 else self.score + score_delta
